@@ -50,8 +50,12 @@ func (e *EC2List) GetEC2ByFilter() {
 				ec2Info.InstanceId = *ins.InstanceId
 				ec2Info.InstanceType = *ins.InstanceType
 				ec2Info.PrivateIpAddress = *ins.PrivateIpAddress
-				ec2Info.PublicIpAddress = *ins.PublicIpAddress
 				ec2Info.State = *ins.State.Name
+				if ec2Info.State == "running" {
+					ec2Info.PublicIpAddress = *ins.PublicIpAddress
+				} else {
+					ec2Info.PublicIpAddress = "-"
+				}
 				ec2Info.VPC = *ins.VpcId
 				ec2Info.Name = getEC2Name(ins.Tags)
 				e.EC2s = append(e.EC2s, ec2Info)

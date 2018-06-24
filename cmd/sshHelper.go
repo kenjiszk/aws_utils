@@ -24,7 +24,10 @@ type SSHInfo struct {
 
 func (s *SSHInfo) execRemoteCommand(remoteCommand string) error {
 	sshHostString := fmt.Sprintf("%s@%s", s.User, s.Host)
-	command := exec.Command("ssh", sshHostString, "-i", s.KeyPath, remoteCommand)
+	command := exec.Command("ssh", sshHostString, remoteCommand)
+	if s.KeyPath != "" {
+		command = exec.Command("ssh", sshHostString, "-i", s.KeyPath, remoteCommand)
+	}
 	stdout, _, exitCode, err := runCommand(command)
 	if err != nil {
 		return err

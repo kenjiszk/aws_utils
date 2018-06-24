@@ -1,11 +1,13 @@
 package cmd
 
 import (
-	"log"
-	"os"
+	"errors"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/spf13/cobra"
+	"log"
+	"os"
+	"strings"
 )
 
 func init() {
@@ -32,19 +34,33 @@ var railsConsole = &cobra.Command{
 		}
 		ec2List.GetEC2ByFilter()
 
-		for _, ec2 := range ec2List.EC2s {
-			sshInfo := SSHInfo{}
-			sshInfo.User = "ec2-user"
-			sshInfo.Host = ec2.PrivateIpAddress
-			sshInfo.KeyPath = ""
-			err := sshInfo.execRemoteCommand("docker ps | grep AAAA | wc -l")
-			if err != nil {
-				log.Fatal(err)
-			}
-			if sshInfo.Result != "0" {
-				err = sshInfo.execRemoteCommand("docker ps | grep XXXXXX")
-				log.Println(sshInfo.Result)
-			}
+		sshInfo, err := getTargeCID(ec2List.EC2s)
+		if err != nil {
+			log.Fatal(err)
 		}
+		log.Printf("Please execute this command [ ssh -t %s 'docker exec -it %s bundle exec rails console' ]\n", sshInfo.Host, sshInfo.Result)
 	},
+}
+
+func getTargeCID(ec2s []EC2Info) (SSHInfo, error) {
+	checkCommand := "docker ps | grep ecs-lasvegas-rails- | wc -l"
+	getCommand := "docker ps | grep ecs-lasvegas-rails- | head -1 | cut -f1 -d' '"
+	for _, ec2 := range ec2s {
+		sshInfo := SSHInfo{}
+		sshInfo.User = "ec2-user"
+		sshInfo.Host = ec2.PrivateIpAddress
+		log.Println(checkCommand)
+		err := sshInfo.execRemoteCommand(checkCommand)
+		if err != nil {
+			log.Fatal(err)
+		}
+		sshInfo.Result = strings.TrimRight(sshInfo.Result, "\n")
+		if sshInfo.Result != "0" {
+			log.Println(getCommand)
+			err = sshInfo.execRemoteCommand(getCommand)
+			sshInfo.Result = strings.TrimRight(sshInfo.Result, "\n")
+			return sshInfo, nil
+		}
+	}
+	return SSHInfo{}, errors.New("There is no target container.")
 }

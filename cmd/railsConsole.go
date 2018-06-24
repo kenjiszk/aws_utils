@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"github.com/aws/aws-sdk-go/aws"
@@ -34,7 +33,18 @@ var railsConsole = &cobra.Command{
 		ec2List.GetEC2ByFilter()
 
 		for _, ec2 := range ec2List.EC2s {
-			fmt.Printf("%s\t%s\t%s\t%s\t%s\t%s\t%s\n", ec2.Name, ec2.InstanceId, ec2.InstanceType, ec2.PrivateIpAddress, ec2.PublicIpAddress, ec2.VPC, ec2.State)
+			sshInfo := SSHInfo{}
+			sshInfo.User = "ec2-user"
+			sshInfo.Host = ec2.PrivateIpAddress
+			sshInfo.KeyPath = ""
+			err := sshInfo.execRemoteCommand("docker ps | grep AAAA | wc -l")
+			if err != nil {
+				log.Fatal(err)
+			}
+			if sshInfo.Result != "0" {
+				err = sshInfo.execRemoteCommand("docker ps | grep XXXXXX")
+				log.Println(sshInfo.Result)
+			}
 		}
 	},
 }

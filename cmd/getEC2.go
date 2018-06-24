@@ -3,13 +3,11 @@ package cmd
 import (
 	"fmt"
 	"log"
-	//"strconv"
 	"github.com/spf13/cobra"
 )
 
 func init() {
 	RootCmd.AddCommand(getEC2)
-	RootCmd.PersistentFlags().StringP("name", "a", "", "EC2 name for filtering.")
 }
 
 var getEC2 = &cobra.Command{

@@ -32,22 +32,7 @@ func (e *EC2List) GetEC2ByFilter() {
 
 	for keepLoop {
 		params := &ec2.DescribeInstancesInput{
-			/* Filters: []*ec2.Filter{
-				{
-					Name: aws.String("vpc-id"),
-					Values: []*string{
-						aws.String(vpcId),
-					},
-				},
-				{
-					Name: aws.String("instance-state-name"),
-					Values: []*string{
-						aws.String("running"),
-						aws.String("stopping"),
-						aws.String("stopped"),
-					},
-				},
-			},*/
+			Filters: e.Filter,
 			MaxResults: aws.Int64(maxResults),
 			NextToken:  nextToken,
 		}

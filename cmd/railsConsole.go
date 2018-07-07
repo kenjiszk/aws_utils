@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/spf13/cobra"
@@ -29,7 +30,7 @@ var railsConsole = &cobra.Command{
 		ec2List.Filter = []*ec2.Filter{
 			{
 				Name:   aws.String("tag:Name"),
-				Values: []*string{aws.String(os.Getenv("ECS_SERVER_NAME"))},
+				Values: []*string{aws.String(os.Getenv("EC2_SERVER_NAME"))},
 			},
 		}
 		ec2List.GetEC2ByFilter()
@@ -43,8 +44,8 @@ var railsConsole = &cobra.Command{
 }
 
 func getTargeCID(ec2s []EC2Info) (SSHInfo, error) {
-	checkCommand := "docker ps | grep ecs-lasvegas-rails- | wc -l"
-	getCommand := "docker ps | grep ecs-lasvegas-rails- | head -1 | cut -f1 -d' '"
+	checkCommand := fmt.Sprintf("docker ps | grep ecs-%s- | wc -l", os.Getenv("ECS_SERVICE_NAME"))
+	getCommand := fmt.Sprintf("docker ps | grep ecs-%s- | head -1 | cut -f1 -d' '", os.Getenv("ECS_SERVICE_NAME"))
 	for _, ec2 := range ec2s {
 		sshInfo := SSHInfo{}
 		sshInfo.User = "ec2-user"

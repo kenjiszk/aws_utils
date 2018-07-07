@@ -19,8 +19,11 @@ func awsEnvValidator() error {
 }
 
 func railsConsoleValidator() error {
-	if os.Getenv("ECS_SERVER_NAME") == "" {
-		return errors.New("ECS_SERVER_NAME is not set.")
+        if os.Getenv("EC2_SERVER_NAME") == "" {
+                return errors.New("EC2_SERVER_NAME is not set.")
+        }
+	if os.Getenv("ECS_SERVICE_NAME") == "" {
+		return errors.New("ECS_SERVICE_NAME is not set.")
 	}
 	return nil
 }
